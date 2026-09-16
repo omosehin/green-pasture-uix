@@ -1,0 +1,754 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+@custom-variant dark (&:where(.dark, .dark *));
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
+/* Fraunces — an old-style serif with a SOFT axis and optical sizing. Its
+   slightly irregular, botanical letterforms carry the "grown, not manufactured"
+   idea that a neutral geometric sans cannot. Display only; DM Sans stays for UI. */
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap");
+
+/* ─── CSS Custom Properties ───────────────────────────────────────────── */
+
+:root {
+	--color-primary: #1f6554;
+	--color-primary-light: #2a7e69;
+	--color-primary-dark: #103630;
+	--color-secondary: #0f766e;
+	--color-accent: #9aca3c;
+
+	--background: #fbfcf4;
+	--foreground: #10231f;
+	--surface-paper: #ffffff;
+	--surface-low: #f6f8eb;
+	--surface-medium: #eef2da;
+	/* Backdrop behind a contained product shot. White in light mode: packshots
+	   read as photography on white, and the section sits on the warm
+	   surface-low, so the tile needs to separate from it rather than blend.
+	   Dark mode recesses instead — surface-medium there was a bright grey slab. */
+	--surface-tile: #ffffff;
+	--surface-high: #e0e8c9;
+
+	--text-primary: #10231f;
+	--text-secondary: rgba(16, 35, 31, 0.72);
+	--text-disabled: rgba(16, 35, 31, 0.38);
+	--text-hint: #5f736c;
+
+	--border-light: #dde7e0;
+	--border-medium: #74908a;
+
+	--shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+
+	/* ─── shadcn/ui tokens (radix-nova primitives) ─────────────────────────
+	   Mapped onto the existing green-pasture palette above — no new colours
+	   invented. --background/--foreground are already declared above and
+	   deliberately left untouched; --primary is declared here for
+	   documentation but intentionally NOT re-exposed under --color-primary
+	   in the @theme block below, because --color-primary already has 128
+	   live `var(--color-primary)` call sites across the app (see
+	   tailwind.config.ts's colors.primary, which independently already
+	   generates a correctly-green bg-primary/text-primary utility with the
+	   same #1f6554 value — redeclaring --color-primary here would risk
+	   shadowing those existing usages for no benefit). */
+	--card: var(--surface-paper);
+	--card-foreground: var(--text-primary);
+	--popover: var(--surface-paper);
+	--popover-foreground: var(--text-primary);
+	--primary: #1f6554; /* = --color-primary above */
+	--primary-foreground: #ffffff; /* derived: no "on-primary" token exists; white matches the text-white already used on primary-600 buttons/badges throughout the app */
+	--secondary: var(--surface-medium);
+	--secondary-foreground: var(--text-primary);
+	--muted: var(--surface-low);
+	--muted-foreground: var(--text-secondary);
+	--accent: var(--surface-medium); /* derived: shadcn --accent is a hover/highlight surface (menu items, select options), not the vivid lime brand accent; no dedicated hover-surface token exists so it reuses the same surface-medium slot as --secondary */
+	--accent-foreground: var(--text-primary);
+	--destructive: #dc2626; /* derived: matches tailwind.config.ts's existing error.DEFAULT/600 (no CSS custom property equivalent exists for it) */
+	--border: var(--border-light);
+	--input: var(--border-light); /* derived: no dedicated input-border token exists; reuses the same border-light slot already used for card/section borders */
+	--ring: #1f6554; /* derived: focus ring in the brand primary green, matching the existing .auth-field focus treatment below */
+	--sidebar: #14532d; /* exact value already used by src/_navigations/Sidebar.tsx (bg-[#14532d]) */
+	--sidebar-foreground: #ffffff; /* Sidebar.tsx uses text-white for its labels/logo */
+	--sidebar-primary: #469a85; /* derived: tailwind.config.ts's primary.400 — the exact shade Sidebar.tsx already uses (text-primary-400 / border-primary-400) to highlight the active nav item */
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: rgba(255, 255, 255, 0.1); /* Sidebar.tsx's active-item background, bg-white/10 */
+	--sidebar-accent-foreground: #ffffff;
+	--sidebar-border: rgba(255, 255, 255, 0.1); /* Sidebar.tsx's divider borders, border-white/10 */
+	--sidebar-ring: #469a85; /* derived: same as --sidebar-primary, no dedicated focus-ring token exists for the dark sidebar */
+}
+
+.dark {
+	--color-primary: #469a85;
+	--color-primary-light: #76bba8;
+	--color-primary-dark: #2a7e69;
+
+	--background: #0a0f1a;
+	--foreground: #f1f5f9;
+	--surface-paper: #111827;
+	--surface-low: #1e293b;
+	--surface-medium: #334155;
+	--surface-tile: #1a2233;
+	--surface-high: #475569;
+
+	--text-primary: #f1f5f9;
+	--text-secondary: rgba(241, 245, 249, 0.7);
+	--text-disabled: rgba(241, 245, 249, 0.35);
+	--text-hint: #64748b;
+
+	--border-light: rgba(255, 255, 255, 0.12);
+	--border-medium: rgba(255, 255, 255, 0.25);
+
+	--shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+	--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4);
+	--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5);
+
+	color-scheme: dark;
+
+	/* ─── shadcn/ui tokens (dark) — see :root for rationale/derivations ─── */
+	--card: var(--surface-paper);
+	--card-foreground: var(--text-primary);
+	--popover: var(--surface-paper);
+	--popover-foreground: var(--text-primary);
+	--primary: #469a85; /* = --color-primary above */
+	--primary-foreground: #ffffff;
+	--secondary: var(--surface-medium);
+	--secondary-foreground: var(--text-primary);
+	--muted: var(--surface-low);
+	--muted-foreground: var(--text-secondary);
+	--accent: var(--surface-medium);
+	--accent-foreground: var(--text-primary);
+	--destructive: #dc2626;
+	--border: var(--border-light);
+	--input: var(--border-light);
+	--ring: #469a85;
+	/* Sidebar.tsx renders the admin sidebar as a permanently-dark surface in
+	   both site themes (bg-[#14532d] dark:bg-[#0e0e1a]), so these match the
+	   dark-mode half of that literal pair rather than re-deriving from the
+	   rest of the dark palette. */
+	--sidebar: #0e0e1a;
+	--sidebar-foreground: #ffffff;
+	--sidebar-primary: #469a85;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: rgba(255, 255, 255, 0.1);
+	--sidebar-accent-foreground: #ffffff;
+	--sidebar-border: rgba(255, 255, 255, 0.1);
+	--sidebar-ring: #469a85;
+}
+
+/* ─── shadcn/ui Tailwind v4 token exposure ─────────────────────────────
+   Registers the bare tokens above under Tailwind's --color-* namespace so
+   utilities like bg-card, bg-sidebar, text-accent-foreground exist for the
+   copied src/components/ui primitives. --color-primary is deliberately
+   omitted (see :root comment above) — bg-primary/text-primary already work
+   via tailwind.config.ts's colors.primary, which is not touched here. */
+
+@theme inline {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ─── Default border colour (Tailwind v4 compat) ──────────────────────
+   Tailwind v4 changed the bare `border` utility's default colour from
+   gray-200 to currentColor, so shadcn primitives (card.tsx etc.) that use
+   an unqualified `border` class now render near-white borders in dark
+   mode. This restores the pre-v4 default via --color-border, per
+   Tailwind's own v4 upgrade-guide shim. Plain CSS (not @apply) so it
+   doesn't depend on utility class availability. Elements with an inline
+   `style={{ border: ... }}` (e.g. /admin/settings) still win, since
+   inline styles outrank this stylesheet rule. */
+@layer base {
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-border, currentColor);
+	}
+}
+
+/* ─── Base Styles ─────────────────────────────────────────────────────── */
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	margin: 0;
+	padding: 0;
+	background: var(--background);
+	color: var(--foreground);
+	transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+a {
+	text-decoration: none;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+/* ─── Container Utility ───────────────────────────────────────────────── */
+
+.page-wrapper {
+	@apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #c3d2c9;
+	border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #9bafa6;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.25);
+}
+
+.sidebar-scrollbar::-webkit-scrollbar {
+	width: 4px;
+}
+
+/* ─── Premium Animations (inspired by EGFM) ──────────────────────────── */
+
+/* Page & Section Animations */
+.animate-page-enter {
+	animation: page-enter 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes page-enter {
+	from { opacity: 0; transform: translateY(12px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card Stagger Animations */
+.animate-card-enter {
+	animation: card-enter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes card-enter {
+	from { opacity: 0; transform: scale(0.97) translateY(8px); }
+	to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-card-delay-1 { animation-delay: 50ms; }
+.animate-card-delay-2 { animation-delay: 100ms; }
+.animate-card-delay-3 { animation-delay: 150ms; }
+.animate-card-delay-4 { animation-delay: 200ms; }
+.animate-card-delay-5 { animation-delay: 250ms; }
+.animate-card-delay-6 { animation-delay: 300ms; }
+
+/* Stat Pop (overshoot bounce) */
+.animate-stat-pop {
+	animation: stat-pop 0.5s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+@keyframes stat-pop {
+	0% { opacity: 0; transform: scale(0.8); }
+	70% { transform: scale(1.05); }
+	100% { opacity: 1; transform: scale(1); }
+}
+
+/* Modal Animations */
+.animate-modal-backdrop {
+	animation: modal-backdrop 0.2s ease forwards;
+}
+
+@keyframes modal-backdrop {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+.animate-modal-content {
+	animation: modal-content 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes modal-content {
+	from { opacity: 0; transform: scale(0.95) translateY(10px); }
+	to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Dropdown Animation */
+.animate-dropdown-enter {
+	animation: dropdown-enter 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes dropdown-enter {
+	from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+	to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Sidebar Animation */
+.animate-sidebar-enter {
+	animation: sidebar-enter 0.25s ease forwards;
+}
+
+@keyframes sidebar-enter {
+	from { opacity: 0; transform: translateX(-16px); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+/* Row Enter Animation */
+.animate-row-enter {
+	animation: row-enter 0.3s ease forwards;
+}
+
+@keyframes row-enter {
+	from { opacity: 0; transform: translateX(-6px); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+/* Header Enter */
+.animate-header-enter {
+	animation: header-enter 0.3s ease forwards;
+}
+
+@keyframes header-enter {
+	from { opacity: 0; transform: translateY(-100%); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* Chart/Panel Reveal */
+.animate-chart-reveal {
+	animation: chart-reveal 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes chart-reveal {
+	from { opacity: 0; transform: translateY(16px) scale(0.98); }
+	to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Toast Animations */
+.animate-toast-enter {
+	animation: toast-enter 0.4s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+@keyframes toast-enter {
+	from { opacity: 0; transform: translateX(100%) scale(0.95); }
+	to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.animate-toast-exit {
+	animation: toast-exit 0.3s ease forwards;
+}
+
+@keyframes toast-exit {
+	from { opacity: 1; transform: translateX(0) scale(1); }
+	to { opacity: 0; transform: translateX(100%) scale(0.95); }
+}
+
+/* ─── Staggered Animation Children ────────────────────────────────────── */
+
+.stagger-children > * {
+	opacity: 0;
+	animation: fade-up 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 80ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 160ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 240ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 320ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 400ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 480ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 560ms; }
+
+/* ─── Interactive Utilities ───────────────────────────────────────────── */
+
+.hover-lift {
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-md);
+}
+
+.press-effect:active {
+	transform: scale(0.97);
+}
+
+.transition-elevation {
+	transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* ─── Shimmer Skeleton ────────────────────────────────────────────────── */
+
+.skeleton-shimmer {
+	background: linear-gradient(
+		90deg,
+		var(--surface-medium) 25%,
+		var(--surface-high) 50%,
+		var(--surface-medium) 75%
+	);
+	background-size: 200% 100%;
+	animation: shimmer 2s infinite linear;
+}
+
+/* ─── Pulse Status Indicator ──────────────────────────────────────────── */
+
+.status-pulse {
+	position: relative;
+}
+
+.status-pulse::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: -2px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: currentColor;
+	transform: translateY(-50%);
+	animation: pulse-ring 2s ease-in-out infinite;
+}
+
+@keyframes pulse-ring {
+	0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+	50% { opacity: 0.5; transform: translateY(-50%) scale(1.5); }
+}
+
+/* ─── Auth Field Styling ──────────────────────────────────────────────── */
+
+.auth-field input:focus {
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(31, 101, 84, 0.18);
+}
+
+.dark .auth-field input:focus {
+	box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
+}
+
+/* ─── Float Animation (Hero product image) ───────────────────────────── */
+
+.animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+	0%, 100% { transform: translateY(0px); }
+	50% { transform: translateY(-16px); }
+}
+
+/* ─── Scale-In Animation (Payment callback icons) ────────────────────── */
+
+.animate-scale-in {
+	animation: scale-in 0.5s cubic-bezier(0.21, 1.02, 0.73, 1) forwards;
+}
+
+@keyframes scale-in {
+	0% { opacity: 0; transform: scale(0.5); }
+	70% { transform: scale(1.08); }
+	100% { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Fade Up (used by stagger-children) ─────────────────────────────── */
+
+@keyframes fade-up {
+	from { opacity: 0; transform: translateY(12px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Shimmer keyframes ──────────────────────────────────────────────── */
+
+@keyframes shimmer {
+	0% { background-position: -200% 0; }
+	100% { background-position: 200% 0; }
+}
+
+/* ─── Suppress browser-native password reveal icons ─────────────────── */
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+	display: none;
+}
+
+/* ─── Rich-text descriptions ─────────────────────────────────────────── */
+/* Shared by the admin editor surface and the storefront renderer, so what an
+   admin composes is what a shopper sees. Tailwind's preflight strips heading
+   and list styling globally, which is why each element is restated here. */
+
+.rte-content {
+	color: var(--text-secondary);
+	font-size: 0.95rem;
+	line-height: 1.75;
+}
+
+.rte-content > :first-child { margin-top: 0; }
+.rte-content > :last-child { margin-bottom: 0; }
+
+.rte-content h1,
+.rte-content h2,
+.rte-content h3 {
+	color: var(--text-primary);
+	font-family: var(--font-display, inherit);
+	font-weight: 500;
+	line-height: 1.25;
+	margin: 1.4em 0 0.5em;
+}
+
+.rte-content h1 { font-size: 1.6rem; }
+.rte-content h2 { font-size: 1.35rem; }
+.rte-content h3 { font-size: 1.15rem; }
+
+.rte-content p { margin: 0 0 0.9em; }
+
+.rte-content strong { color: var(--text-primary); font-weight: 600; }
+.rte-content em { font-style: italic; }
+.rte-content u { text-decoration: underline; }
+.rte-content s { text-decoration: line-through; }
+
+.rte-content ul,
+.rte-content ol {
+	margin: 0 0 0.9em;
+	padding-left: 1.4em;
+}
+
+.rte-content ul { list-style: disc; }
+.rte-content ol { list-style: decimal; }
+.rte-content li { margin: 0.25em 0; }
+.rte-content li > p { margin: 0; }
+
+.rte-content blockquote {
+	border-left: 3px solid var(--color-primary);
+	margin: 1em 0;
+	padding: 0.15em 0 0.15em 1em;
+	color: var(--text-hint);
+	font-style: italic;
+}
+
+.rte-content a {
+	color: var(--color-primary);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.rte-content code {
+	background: var(--surface-medium);
+	border-radius: 4px;
+	font-size: 0.875em;
+	padding: 0.15em 0.4em;
+}
+
+.rte-content pre {
+	background: var(--surface-medium);
+	border-radius: 8px;
+	margin: 1em 0;
+	overflow-x: auto;
+	padding: 0.9em 1em;
+}
+
+.rte-content pre code { background: none; padding: 0; }
+
+.rte-content hr {
+	border: 0;
+	border-top: 1px solid var(--border-light);
+	margin: 1.5em 0;
+}
+
+.rte-content img { max-width: 100%; height: auto; }
+
+/* The editor surface scrolls rather than growing without bound. */
+.rte-content:focus { outline: none; }
+
+/* ─── Horizontal rails ───────────────────────────────────────────────── */
+/* The row scrolls; the scrollbar is noise under a set of product cards.
+   Keyboard and touch scrolling are unaffected — only the chrome is hidden. */
+
+.hide-scrollbar {
+	scrollbar-width: none;          /* Firefox */
+	-ms-overflow-style: none;       /* legacy Edge */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+/* ==========================================================================
+   Delete Button Microinteraction ("Bin eats the label")
+   ========================================================================== */
+@keyframes letterFall {
+	0% {
+		transform: translateY(0) rotate(0deg) scale(1);
+		opacity: 1;
+	}
+	35% {
+		transform: translateY(-5px) rotate(-12deg) scale(1.05);
+		opacity: 1;
+	}
+	70% {
+		transform: translateY(18px) rotate(45deg) scale(0.65);
+		opacity: 0.85;
+	}
+	100% {
+		transform: translateY(34px) rotate(90deg) scale(0);
+		opacity: 0;
+	}
+}
+
+@keyframes binShake {
+	0%, 100% { transform: rotate(0deg) scale(1.1); }
+	20% { transform: rotate(-10deg) scale(1.18); }
+	40% { transform: rotate(10deg) scale(1.18); }
+	60% { transform: rotate(-6deg) scale(1.12); }
+	80% { transform: rotate(6deg) scale(1.12); }
+}
+
+@keyframes ringSeal {
+	0% {
+		transform: scale(0.96);
+		opacity: 0;
+		box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+	}
+	40% {
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1.06);
+		opacity: 0;
+		box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+	}
+}
+
+@keyframes lidOpenClose {
+	0% {
+		transform: rotate(0deg);
+	}
+	20%, 80% {
+		transform: rotate(-32deg) translateY(-2px);
+	}
+	100% {
+		transform: rotate(0deg) translateY(0);
+	}
+}
+
+.animate-letter-fall {
+	animation: letterFall 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-bin-shake {
+	animation: binShake 0.6s ease-in-out;
+}
+
+.animate-ring-seal {
+	animation: ringSeal 0.7s ease-out forwards;
+}
+
+.animate-lid-cycle {
+	animation: lidOpenClose 0.85s ease-in-out forwards;
+}
+
+/* ==========================================================================
+   Advance Receipt Print Animations (Slot Feed, Stamp Impact, Paper Tear)
+   ========================================================================== */
+@keyframes receiptFeed {
+	0% {
+		transform: translateY(-90%) scaleY(0.85);
+		opacity: 0.15;
+	}
+	30% {
+		transform: translateY(-45%) scaleY(0.96);
+		opacity: 0.7;
+	}
+	75% {
+		transform: translateY(3%) scaleY(1.02);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(0%) scaleY(1);
+		opacity: 1;
+	}
+}
+
+@keyframes stampImpact {
+	0% {
+		opacity: 0;
+		transform: scale(2.8) rotate(-30deg);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(0.92) rotate(-14deg);
+	}
+	75% {
+		transform: scale(1.06) rotate(-13deg);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1) rotate(-14deg);
+	}
+}
+
+@keyframes receiptTear {
+	0% {
+		transform: translateY(0) rotate(0deg);
+		opacity: 1;
+	}
+	40% {
+		transform: translateY(18px) rotate(-4deg);
+		opacity: 0.85;
+	}
+	100% {
+		transform: translateY(50px) rotate(-10deg);
+		opacity: 0;
+	}
+}
+
+.animate-receipt-feed {
+	animation: receiptFeed 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-stamp-impact {
+	animation: stampImpact 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-receipt-tear {
+	animation: receiptTear 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
